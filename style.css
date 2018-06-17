@@ -1,0 +1,29 @@
+*{
+    margin: 0;
+    padding:0;
+}
+.mainPanel{
+    display: grid;
+    grid-template-columns: [panel-start] repeat(64, 30px) [panel-end];
+    grid-template-rows: [panel-start] repeat(21,18px) [panel-end];
+}
+.item{
+    background: rgb(125, 125, 125);
+    z-index: 9;
+}
+.lineRow{/*水平线*/
+    height: 1px;
+    background: rgb(100, 100, 100);
+    grid-column: panel;
+}
+.lineColumn{/*垂直线*/
+    width: 1px;
+    background: rgb(100, 100, 100);
+    grid-row: panel;
+}
+.sight{
+    background: rgb(175, 175, 175);
+    /* grid-column:2; */
+    /* grid-row: 2; */
+    transition: grid-area 0.2s;
+}

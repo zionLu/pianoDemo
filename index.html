@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>PianoDemo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div class="mainPanel" @click="createItem" @mouseMove="showSight" @mouseLeave="hideSight">
+            <div class="lineRow" v-for="(index) in row"  :style="{gridRow:index}"></div>
+            <div class="lineColumn" v-for="(index) in column"  :style="{gridColumn:index}"></div>
+            <div class="sight" id="sight" :style="{display:mouseIn?'block':'none',gridColumn:sightX,gridRow:sightY}"></div>
+            <div class="item" v-for="(item, index) in soundList" :key="index" :style="{gridColumn:item.x + '/' + item.length + ' span',gridRow:item.y}"></div>
+        </div>
+        <div>{{sightX}}-{{sightY}}</div>
+    </div>
+    
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="main.js"></script>
+</html>
