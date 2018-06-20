@@ -4,12 +4,28 @@
 }
 .mainPanel{
     display: grid;
-    grid-template-columns: [panel-start] repeat(64, 30px) [panel-end];
-    grid-template-rows: [panel-start] repeat(21,18px) [panel-end];
+    grid-template-columns: [panel-start] repeat(256, 30px) [panel-end];
+    grid-template-rows: [panel-start] repeat(36,18px) [panel-end];
 }
 .item{
     background: rgb(125, 125, 125);
     z-index: 9;
+    position: relative;
+}
+.item:hover{
+    background:black;
+}
+.itemStretch{
+    position: absolute;
+    height: 100%;
+    width: 6px;
+    cursor: ew-resize;
+}
+.itemLeft{
+    left: 0;
+}
+.itemRight{
+    right: 0;
 }
 .lineRow{/*水平线*/
     height: 1px;
