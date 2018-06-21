@@ -136,7 +136,9 @@ var app = new Vue({
             }
         },
         deleteAll:function(){
-            this.soundList=[]
+            if(confirm("是否清空音符序列")){
+                this.soundList=[]
+            }
         }
 
     },
