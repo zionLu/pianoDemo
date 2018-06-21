@@ -10,21 +10,27 @@
 </head>
 <body>
     <div id="app">
-        <div class="mainPanel" @click.stop="createItem" @mouseMove.stop="allMouseMove" @mouseUp.stop="unmark" @mouseOver.stop="showSight" @mouseLeave.stop="hideSight">
+        <div class="mainPanel" id="mainPanel" @click.stop="createItem" @mouseMove.stop="allMouseMove" @mouseUp.stop="unmark" @mouseOver.stop="showSight" @mouseLeave.stop="hideSight">
             <!-- 水平分隔线 -->
             <div class="lineRow" v-for="(index) in row"  :style="{gridRow:index}"></div>
             <!-- 垂直分隔线 -->
             <div class="lineColumn" v-for="(index) in column"  :style="{gridColumn:index}"></div>
+            <!-- 开始线 -->
+            <div class="lineColumn startLine" :style="{gridColumn:startX}" @mouseEnter.stop="inStartLine" @mouseDown.stop="markStartLine"></div>
             <!-- hover时所在的格子，亦即准星 -->
             <div class="sight" id="sight" :style="{display:mouseIn?'block':'none',gridColumn:sightX,gridRow:sightY}"></div>
             <!-- 所有音符 -->
-            <div class="item" v-for="(item, index) in soundList" :key="index" :style="{gridColumn:item.x + '/' + item.length + ' span',gridRow:item.y}" @click.ctrl.stop="deleteItem(index)" @mouseDown.stop="markItem(index)" @mouseEnter.stop="inItem(index)">
+            <div class="item" v-for="(item, index) in soundList" :key="index" :class="{itemPlaying:item.playing}" :style="{gridColumn:item.x + '/' + item.length + ' span',gridRow:item.y}" @click.ctrl.stop="deleteItem(index)" @mouseDown.stop="markItem(index)" @mouseEnter.stop="inItem(index)">
                 <div class="itemLeft itemStretch" @mouseDown.stop="markBorder(index,false)"></div>
                 <div class="itemRight itemStretch" @mouseDown.stop="markBorder(index,true)"></div>
             </div>
         </div>
-        <div>{{sightX}}-{{sightY}}</div>
-        <div @click="playAll" style="cursor: pointer;">play</div>
+        <div class="menu">
+            <div>{{sightX}}-{{currentSound}}</div>
+            <div @click="playAll" style="cursor: pointer;">play</div>
+            <div @click="deleteAll" style="cursor: pointer;">clean</div>
+        </div>
+        
     </div>
     
 </body>

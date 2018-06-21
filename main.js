@@ -12,15 +12,28 @@ var app = new Vue({
         moveTargetItem:undefined,
         stretchTargetItem:undefined,
         stretchPath:undefined,//false左true右
+
+        startX:1,
+        moveStartLineFlag:false,
     },
     methods:{
+        inStartLine:()=>{
+            app.hideSight()
+        },
+        markStartLine:()=>{
+            app.moveStartLineFlag=true
+        },
+        moveStartLine:(evt)=>{
+            app.startX=parseInt((evt.clientX-getElementViewLeft(document.getElementById("mainPanel")))/30+1)
+        },
         createItem:(event)=>{
             var self = this
             if(app.mouseIn&&app.moveTargetItem===undefined){
                 app.soundList.push({
-                    x:parseInt(event.clientX/30+1),
+                    x:parseInt((event.clientX-getElementViewLeft(document.getElementById("mainPanel")))/30+1),
                     y:parseInt(event.clientY/18+1),
                     length:1,
+                    playing:false,
                 })
                 pianoSound(parseInt(event.clientY/18+1))
                 console.log("create")
@@ -36,13 +49,16 @@ var app = new Vue({
         unmark:()=>{
             app.moveTargetItem=undefined
             app.stretchTargetItem=undefined
+            app.moveStartLineFlag=false
         },
         moveItem:(evt)=>{
-            var x = parseInt(evt.clientX/30+1)
+            var x = parseInt((evt.clientX-getElementViewLeft(document.getElementById("mainPanel")))/30+1)
             var y = parseInt(evt.clientY/18+1)
             if(app.soundList[app.moveTargetItem].x!=x||app.soundList[app.moveTargetItem].y!=y){
                 app.soundList[app.moveTargetItem].x=x
                 app.soundList[app.moveTargetItem].y=y
+                app.sightX = x
+                app.sightY = y
                 pianoSound(y)
             }
             
@@ -54,17 +70,16 @@ var app = new Vue({
         },
         stretchItem:(evt)=>{
             if(app.stretchPath){//向右伸缩
-                let result = Math.ceil(evt.clientX/30+1)-app.soundList[app.stretchTargetItem].x
+                let result = Math.ceil((evt.clientX-getElementViewLeft(document.getElementById("mainPanel")))/30+1)-app.soundList[app.stretchTargetItem].x
                 if(result>0){
                     app.soundList[app.stretchTargetItem].length=result
                 }
             }else{//向左伸缩
-                let result = app.soundList[app.stretchTargetItem].x-parseInt(evt.clientX/30+1)+app.soundList[app.stretchTargetItem].length
+                let result = app.soundList[app.stretchTargetItem].x-parseInt((evt.clientX-getElementViewLeft(document.getElementById("mainPanel")))/30+1)+app.soundList[app.stretchTargetItem].length
                 if(result>0){
-                    console.log(result)
                     app.soundList[app.stretchTargetItem].length=result
                     
-                    app.soundList[app.stretchTargetItem].x=parseInt(evt.clientX/30+1)
+                    app.soundList[app.stretchTargetItem].x=parseInt((evt.clientX-getElementViewLeft(document.getElementById("mainPanel")))/30+1)
                 }
                 
             }
@@ -80,6 +95,8 @@ var app = new Vue({
                 app.moveItem(event)
             }else if(app.stretchTargetItem!==undefined){
                 app.stretchItem(event)
+            }else if(app.moveStartLineFlag){
+                app.moveStartLine(event)
             }else{
                 app.moveSight(event)
             }
@@ -91,7 +108,7 @@ var app = new Vue({
             
         },
         moveSight:(evt)=>{
-            var x = parseInt(evt.clientX/30+1)
+            var x = parseInt((evt.clientX-getElementViewLeft(document.getElementById("mainPanel")))/30+1)
             var y = parseInt(evt.clientY/18+1)
             if(app.sightX!=x||app.sightY!=y){
                 app.sightX = x
@@ -100,19 +117,42 @@ var app = new Vue({
             }
         },
         hideSight:()=>{
-            app.mouseIn = false,
-            app.sightX = 0
-            app.sightY = 0
+            app.mouseIn = false
+            // app.sightX = 0
+            // app.sightY = 0
         },
 
         playAll:function(){
             for(let i=0;i<app.soundList.length;i++){
-                setTimeout(function(){
-                    pianoSound(app.soundList[i].y) 
-                },(app.soundList[i].x-1)*app.beatInterval*1000)
+                if(app.soundList[i].x>=app.startX){
+                    setTimeout(function(){
+                        app.soundList[i].playing=true
+                        pianoSound(app.soundList[i].y)
+                        setTimeout(() => {
+                            app.soundList[i].playing=false
+                        }, app.soundList[i].length*app.beatInterval*1000); 
+                    },(app.soundList[i].x-app.startX)*app.beatInterval*1000)
+                }
             }
+        },
+        deleteAll:function(){
+            this.soundList=[]
         }
 
+    },
+    computed:{
+        currentSound:function(){
+            var order = parseInt((36-this.sightY)/12)
+            if(order==0){
+                order = "a"
+            }else if(order==1){
+                order = "b"
+            }else if(order==2){
+                order = "c"
+            }
+            var keyList = [1,1.5,2,2.5,3,4,4.5,5,5.5,6,6.5,7]
+            return order + keyList[(36-this.sightY)%12]
+        }
     }
 })
 
@@ -125,7 +165,6 @@ xml = new XMLHttpRequest();
 xml.responseType = 'arraybuffer';
 xml.open('GET', 'https://lig-dsktschy.github.io/waapi-piano/piano/media/piano.wav', true);
 xml.onload = function() {
-    console.log(xml.response)
     ctx.decodeAudioData(
         xml.response,
         function(_data) {
@@ -150,8 +189,22 @@ function pianoSound(y){
     var bufferSource;
     bufferSource = ctx.createBufferSource();
     bufferSource.buffer = data;
-    // 音源再生速度の比率変更で、音源の高さを調整
     bufferSource.playbackRate.value = rateList[36-y];
     bufferSource.connect(ctx.destination);
     bufferSource.start(0);
+}
+
+function getElementViewLeft(element){
+    var actualLeft = element.offsetLeft;
+    var current = element.offsetParent;
+    while (current !== null){
+    　　actualLeft +=  (current.offsetLeft+current.clientLeft);
+    　　current = current.offsetParent;
+    }
+    if (document.compatMode == "BackCompat"){
+    　　var elementScrollLeft=document.body.scrollLeft;
+    } else {
+    　　var elementScrollLeft=document.documentElement.scrollLeft; 
+    }
+    return actualLeft-elementScrollLeft;
 }

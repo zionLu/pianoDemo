@@ -1,11 +1,18 @@
 *{
     margin: 0;
     padding:0;
+    
+}
+#app{
+    width: fit-content;
+    width: -moz-fit-content;
 }
 .mainPanel{
     display: grid;
     grid-template-columns: [panel-start] repeat(256, 30px) [panel-end];
     grid-template-rows: [panel-start] repeat(36,18px) [panel-end];
+    width: fit-content;
+    width: -moz-fit-content;
 }
 .item{
     background: rgb(125, 125, 125);
@@ -14,6 +21,9 @@
 }
 .item:hover{
     background:black;
+}
+.itemPlaying{
+    background: red;
 }
 .itemStretch{
     position: absolute;
@@ -37,9 +47,19 @@
     background: rgb(100, 100, 100);
     grid-row: panel;
 }
+.startLine{
+    width: 3px;
+    background: red;
+    cursor: col-resize;
+}
 .sight{
     background: rgb(175, 175, 175);
     /* grid-column:2; */
     /* grid-row: 2; */
     transition: grid-area 0.2s;
+}
+
+.menu{
+    position: fixed;
+    left: 0;
 }
